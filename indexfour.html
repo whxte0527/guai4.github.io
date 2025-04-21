@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>塔羅牌｜空間壓縮</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #1a1a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    #container {
+      position: relative;
+      width: 320px;
+      height: 480px;
+    }
+
+    #answer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('fourtarot_background.jpg') no-repeat center/cover;
+      color: white;
+      padding: 24px;
+      box-sizing: border-box;
+      font-size: 18px;
+      line-height: 1.6;
+      text-shadow: 1px 1px 4px #000;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    h2 {
+	font-size: 30px;
+	margin-bottom: 12px;
+	text-align: center;
+	font-family: "華康超特明體";
+	font-style: normal;
+	font-weight: 400;
+    }
+  </style>
+<!--The following script tag downloads a font from the Adobe Edge Web Fonts server for use within the web page. We recommend that you do not modify it.--><script>var __adobewebfontsappname__="dreamweaver"</script><script src="http://use.edgefonts.net/acme:n4:default;adamina:n4:default;economica:n4:default.js" type="text/javascript"></script>
+</head>
+<body>
+  <div id="container">
+    <div id="answer">
+      <h2>空間壓縮</h2>
+      <p>在紅線、小巷隨意擺放私人物品、堆放盆栽，造成轉角遮蔽視線、壓縮巷弄空間。</p>
+    </div>
+    <canvas id="scratchCanvas" width="320" height="480"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("scratchCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function initCanvas() {
+      ctx.fillStyle = "#C0C0C0"; // 銀色遮罩
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function eraseLine(x, y) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.lineWidth = 30;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.globalCompositeOperation = "source-over";
+      lastX = x;
+      lastY = y;
+    }
+
+    function getMousePos(canvas, evt) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+
+    function getTouchPos(canvas, touch) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    }
+
+    // Mouse Events
+    canvas.addEventListener("mousedown", (e) => {
+      isDrawing = true;
+      const pos = getMousePos(canvas, e);
+      lastX = pos.x;
+      lastY = pos.y;
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!isDrawing) return;
+      const pos = getMousePos(canvas, e);
+      eraseLine(pos.x, pos.y);
+    });
+
+    canvas.addEventListener("mouseup", () => isDrawing = false);
+    canvas.addEventListener("mouseleave", () => isDrawing = false);
+
+    // Touch Events
+    canvas.addEventListener("touchstart", (e) => {
+      isDrawing = true;
+      const pos = getTouchPos(canvas, e.touches[0]);
+      lastX = pos.x;
+      lastY = pos.y;
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      if (!isDrawing) return;
+      const pos = getTouchPos(canvas, e.touches[0]);
+      eraseLine(pos.x, pos.y);
+    });
+
+    canvas.addEventListener("touchend", () => isDrawing = false);
+
+    initCanvas();
+  </script>
+</body>
+</html>
+
